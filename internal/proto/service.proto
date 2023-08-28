@@ -1,0 +1,10 @@
+syntax = "proto3";
+import "rpc_app_login.proto";
+
+package pb;
+
+option go_package = "github.com/zvash/bgmood-api-gateway/pb";
+
+service App {
+  rpc Login (LoginRequest) returns (LoginResponse) {}
+}
