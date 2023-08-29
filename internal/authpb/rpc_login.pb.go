@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.31.0
 // 	protoc        v4.23.4
-// source: rpc_app_login.proto
+// source: rpc_login.proto
 
 package authpb
 

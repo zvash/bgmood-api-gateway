@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"github.com/zvash/bgmood-api-gateway/internal/authpb"
-	"github.com/zvash/bgmood-api-gateway/internal/pb"
 	"google.golang.org/grpc"
 )
 
@@ -17,30 +16,19 @@ func NewAuthServiceClient(cc *grpc.ClientConn) *AuthServiceClient {
 		service: service,
 	}
 }
-func (client *AuthServiceClient) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	authRequest := &authpb.LoginRequest{
-		Email:    req.Email,
-		Password: req.Password,
-	}
-	authResponse, err := client.service.Login(ctx, authRequest)
-	if err != nil {
-		return nil, err
-	}
-	resp := &pb.LoginResponse{
-		SessionId:             authResponse.SessionId,
-		AccessToken:           authResponse.AccessToken,
-		AccessTokenExpiresAt:  authResponse.AccessTokenExpiresAt,
-		RefreshToken:          authResponse.RefreshToken,
-		RefreshTokenExpiresAt: authResponse.RefreshTokenExpiresAt,
-		Verified:              authResponse.Verified,
-		User: &pb.User{
-			Id:         authResponse.User.Id,
-			Email:      authResponse.User.Email,
-			Name:       authResponse.User.Name,
-			Avatar:     authResponse.User.Avatar,
-			IsVerified: authResponse.User.IsVerified,
-			CreateAt:   authResponse.User.CreateAt,
-		},
-	}
-	return resp, nil
+func (client *AuthServiceClient) Login(ctx context.Context, req *authpb.LoginRequest) (*authpb.LoginResponse, error) {
+	resp, err := client.service.Login(ctx, req)
+	return resp, err
+}
+
+func (client *AuthServiceClient) ListActiveSessions(ctx context.Context, req *authpb.ListActiveSessionsRequest) (*authpb.ListActiveSessionsResponse, error) {
+	return client.service.ListActiveSessions(ctx, req)
+}
+
+func (client *AuthServiceClient) RegisterUser(ctx context.Context, req *authpb.RegisterUserRequest) (*authpb.RegisterUserResponse, error) {
+	return client.service.RegisterUser(ctx, req)
+}
+
+func (client *AuthServiceClient) UpdateUser(ctx context.Context, req *authpb.UpdateUserRequest) (*authpb.UpdateUserResponse, error) {
+	return client.service.UpdateUser(ctx, req)
 }

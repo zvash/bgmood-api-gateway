@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	App_Login_FullMethodName = "/pb.App/Login"
+	App_UpdateProfile_FullMethodName = "/pb.App/UpdateProfile"
 )
 
 // AppClient is the client API for App service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AppClient interface {
-	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	UpdateProfile(ctx context.Context, opts ...grpc.CallOption) (App_UpdateProfileClient, error)
 }
 
 type appClient struct {
@@ -37,20 +37,45 @@ func NewAppClient(cc grpc.ClientConnInterface) AppClient {
 	return &appClient{cc}
 }
 
-func (c *appClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
-	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, App_Login_FullMethodName, in, out, opts...)
+func (c *appClient) UpdateProfile(ctx context.Context, opts ...grpc.CallOption) (App_UpdateProfileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &App_ServiceDesc.Streams[0], App_UpdateProfile_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &appUpdateProfileClient{stream}
+	return x, nil
+}
+
+type App_UpdateProfileClient interface {
+	Send(*UpdateProfileRequest) error
+	CloseAndRecv() (*UpdateProfileResponse, error)
+	grpc.ClientStream
+}
+
+type appUpdateProfileClient struct {
+	grpc.ClientStream
+}
+
+func (x *appUpdateProfileClient) Send(m *UpdateProfileRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *appUpdateProfileClient) CloseAndRecv() (*UpdateProfileResponse, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(UpdateProfileResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // AppServer is the server API for App service.
 // All implementations must embed UnimplementedAppServer
 // for forward compatibility
 type AppServer interface {
-	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	UpdateProfile(App_UpdateProfileServer) error
 	mustEmbedUnimplementedAppServer()
 }
 
@@ -58,8 +83,8 @@ type AppServer interface {
 type UnimplementedAppServer struct {
 }
 
-func (UnimplementedAppServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+func (UnimplementedAppServer) UpdateProfile(App_UpdateProfileServer) error {
+	return status.Errorf(codes.Unimplemented, "method UpdateProfile not implemented")
 }
 func (UnimplementedAppServer) mustEmbedUnimplementedAppServer() {}
 
@@ -74,22 +99,30 @@ func RegisterAppServer(s grpc.ServiceRegistrar, srv AppServer) {
 	s.RegisterService(&App_ServiceDesc, srv)
 }
 
-func _App_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LoginRequest)
-	if err := dec(in); err != nil {
+func _App_UpdateProfile_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(AppServer).UpdateProfile(&appUpdateProfileServer{stream})
+}
+
+type App_UpdateProfileServer interface {
+	SendAndClose(*UpdateProfileResponse) error
+	Recv() (*UpdateProfileRequest, error)
+	grpc.ServerStream
+}
+
+type appUpdateProfileServer struct {
+	grpc.ServerStream
+}
+
+func (x *appUpdateProfileServer) SendAndClose(m *UpdateProfileResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *appUpdateProfileServer) Recv() (*UpdateProfileRequest, error) {
+	m := new(UpdateProfileRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(AppServer).Login(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: App_Login_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).Login(ctx, req.(*LoginRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
 // App_ServiceDesc is the grpc.ServiceDesc for App service.
@@ -98,12 +131,13 @@ func _App_Login_Handler(srv interface{}, ctx context.Context, dec func(interface
 var App_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.App",
 	HandlerType: (*AppServer)(nil),
-	Methods: []grpc.MethodDesc{
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "Login",
-			Handler:    _App_Login_Handler,
+			StreamName:    "UpdateProfile",
+			Handler:       _App_UpdateProfile_Handler,
+			ClientStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "service.proto",
 }

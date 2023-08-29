@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/zvash/bgmood-api-gateway/internal/authpb"
 	"github.com/zvash/bgmood-api-gateway/internal/gapi"
 	"github.com/zvash/bgmood-api-gateway/internal/pb"
 	"github.com/zvash/bgmood-api-gateway/internal/util"
@@ -27,6 +28,7 @@ func runGrpcServer(config util.Config) {
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterAppServer(grpcServer, server)
+	authpb.RegisterAuthServer(grpcServer, server)
 	reflection.Register(grpcServer)
 
 	listener, err := net.Listen("tcp", config.GRPCServerAddress)

@@ -2,22 +2,12 @@ package gapi
 
 import (
 	"context"
-	"github.com/zvash/bgmood-api-gateway/internal/client"
-	"github.com/zvash/bgmood-api-gateway/internal/pb"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"github.com/zvash/bgmood-api-gateway/internal/authpb"
 )
 
-func (server *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (server *Server) Login(ctx context.Context, req *authpb.LoginRequest) (*authpb.LoginResponse, error) {
 	requestContext := server.buildClientContext(ctx)
-	serverAddress := server.config.AuthServiceGRPCServerAddress
-	transportOption := grpc.WithTransportCredentials(insecure.NewCredentials())
-	cc, err := grpc.Dial(serverAddress, transportOption)
-	if err != nil {
-		return nil, err
-	}
-	authClient := client.NewAuthServiceClient(cc)
-	resp, err := authClient.Login(requestContext, req)
+	resp, err := server.AuthServiceClient.Login(requestContext, req)
 	if err != nil {
 		return nil, err
 	}
