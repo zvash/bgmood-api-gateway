@@ -16,6 +16,7 @@ func NewAuthServiceClient(cc *grpc.ClientConn) *AuthServiceClient {
 		service: service,
 	}
 }
+
 func (client *AuthServiceClient) Login(ctx context.Context, req *authpb.LoginRequest) (*authpb.LoginResponse, error) {
 	resp, err := client.service.Login(ctx, req)
 	return resp, err
