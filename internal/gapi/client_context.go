@@ -2,6 +2,8 @@ package gapi
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/zvash/bgmood-api-gateway/internal/authpb"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 )
@@ -43,4 +45,23 @@ func (server *Server) buildClientContext(ctx context.Context, headerPairs ...Hea
 	}
 	newMetaData := metadata.New(headers)
 	return metadata.NewOutgoingContext(ctx, newMetaData)
+}
+
+func (server *Server) buildClientContextWithUser(ctx context.Context) (context.Context, error) {
+	authenticateCtx := server.buildClientContext(ctx)
+	authenticateResponse, err := server.AuthServiceClient.Authenticate(authenticateCtx, &authpb.AuthenticateRequest{})
+	if err != nil {
+		return nil, err
+	}
+	user := authenticateResponse.GetUser()
+	userAsBytes, err := json.Marshal(user)
+	if err != nil {
+		return nil, err
+	}
+	userAsString := string(userAsBytes)
+	keyValuePair := HeaderPair{
+		Key:   userObjectHeader,
+		Value: userAsString,
+	}
+	return server.buildClientContext(ctx, keyValuePair), nil
 }

@@ -33,3 +33,7 @@ func (client *AuthServiceClient) RegisterUser(ctx context.Context, req *authpb.R
 func (client *AuthServiceClient) UpdateUser(ctx context.Context, req *authpb.UpdateUserRequest) (*authpb.UpdateUserResponse, error) {
 	return client.service.UpdateUser(ctx, req)
 }
+
+func (client *AuthServiceClient) Authenticate(ctx context.Context, req *authpb.AuthenticateRequest) (*authpb.AuthenticateResponse, error) {
+	return client.service.Authenticate(ctx, req)
+}
