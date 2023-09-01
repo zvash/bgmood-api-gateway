@@ -6,14 +6,20 @@ import (
 	"google.golang.org/grpc/peer"
 )
 
+type HeaderPair struct {
+	Key   string
+	Value string
+}
+
 const (
 	grpcGatewayUserAgentHeader = "grpcgateway-user-agent"
 	userAgentHeader            = "user-agent"
 	xForwardedForHeader        = "x-forwarded-for"
 	authorizationHeader        = "authorization"
+	userObjectHeader           = "user-object"
 )
 
-func (server *Server) buildClientContext(ctx context.Context) context.Context {
+func (server *Server) buildClientContext(ctx context.Context, headerPairs ...HeaderPair) context.Context {
 	headers := make(map[string]string)
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		if authHeaders := md.Get(authorizationHeader); len(authHeaders) > 0 {
@@ -31,6 +37,9 @@ func (server *Server) buildClientContext(ctx context.Context) context.Context {
 	}
 	if p, ok := peer.FromContext(ctx); ok {
 		headers[xForwardedForHeader] = p.Addr.String()
+	}
+	for _, pair := range headerPairs {
+		headers[pair.Key] = pair.Value
 	}
 	newMetaData := metadata.New(headers)
 	return metadata.NewOutgoingContext(ctx, newMetaData)
