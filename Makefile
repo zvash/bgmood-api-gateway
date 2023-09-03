@@ -17,9 +17,14 @@ proto-file:
 	rm -rf internal/filepb/* 2>/dev/null
 	protoc --go_out=internal/filepb --go_opt=paths=source_relative --go-grpc_out=internal/filepb --go-grpc_opt=paths=source_relative --grpc-gateway_out=internal/filepb --grpc-gateway_opt=paths=source_relative --proto_path=../bgmood-protos/file-service ../bgmood-protos/file-service/*.proto
 
+proto-circles:
+	rm -rf internal/circlespb/* 2>/dev/null
+	protoc --go_out=internal/circlespb --go_opt=paths=source_relative --go-grpc_out=internal/circlespb --go-grpc_opt=paths=source_relative --grpc-gateway_out=internal/circlespb --grpc-gateway_opt=paths=source_relative --proto_path=../bgmood-protos/circles-service ../bgmood-protos/circles-service/*.proto
+
 proto:
 	make proto-api
 	make proto-auth
 	make proto-file
+	make proto-circles
 
-.PHONY: test server proto proto-auth proto-api proto-file
+.PHONY: test server proto proto-auth proto-api proto-file proto-circles
