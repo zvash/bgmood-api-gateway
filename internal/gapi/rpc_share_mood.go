@@ -1,10 +1,8 @@
 package gapi
 
 import (
-	"fmt"
 	"github.com/zvash/bgmood-api-gateway/internal/cpb"
 	"github.com/zvash/bgmood-api-gateway/internal/pb"
-	"github.com/zvash/bgmood-api-gateway/internal/util"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -42,10 +40,14 @@ func (server *Server) ShareMood(stream pb.App_ShareMoodServer) error {
 		if err != nil {
 			return logError(err)
 		}
-		var mood = &pb.Mood{}
-		mood, err = util.ConvertTypes(circleServiceResp.Mood, mood)
-		if err != nil {
-			return logError(fmt.Errorf("could not convert circle-service circle to gateway circle: %w", err))
+		var mood = &pb.Mood{
+			Id:            circleServiceResp.GetMood().GetId(),
+			PosterId:      circleServiceResp.GetMood().GetPosterId(),
+			CircleId:      circleServiceResp.GetMood().GetCircleId(),
+			Image:         circleServiceResp.GetMood().GetImage(),
+			SetBackground: circleServiceResp.GetMood().GetSetBackground(),
+			CreatedAt:     circleServiceResp.GetMood().GetCreatedAt(),
+			Description:   circleServiceResp.GetMood().Description,
 		}
 		shareMoodResponse.Mood = mood
 	}
