@@ -3,6 +3,7 @@ package gapi
 import (
 	"github.com/zvash/bgmood-api-gateway/internal/authpb"
 	"github.com/zvash/bgmood-api-gateway/internal/client"
+	"github.com/zvash/bgmood-api-gateway/internal/cpb"
 	"github.com/zvash/bgmood-api-gateway/internal/pb"
 	"github.com/zvash/bgmood-api-gateway/internal/util"
 	"google.golang.org/grpc"
@@ -13,9 +14,11 @@ import (
 type Server struct {
 	pb.UnimplementedAppServer
 	authpb.UnimplementedAuthServer
-	AuthServiceClient *client.AuthServiceClient
-	FileServiceClient *client.FileServiceClient
-	config            util.Config
+	cpb.UnimplementedCirclesServer
+	AuthServiceClient   *client.AuthServiceClient
+	FileServiceClient   *client.FileServiceClient
+	CircleServiceClient *client.CircleServiceClient
+	config              util.Config
 }
 
 func NewServer(config util.Config) (*Server, error) {
@@ -34,6 +37,12 @@ func NewServer(config util.Config) (*Server, error) {
 		return nil, err
 	}
 	server.FileServiceClient = client.NewFileServiceClient(fileCC)
+
+	circleCC, err := dial(server.config.CircleServiceGRPCServerAddress)
+	if err != nil {
+		return nil, err
+	}
+	server.CircleServiceClient = client.NewCircleServiceClient(circleCC)
 
 	return server, nil
 }
