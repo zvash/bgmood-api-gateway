@@ -30,3 +30,10 @@ func (client *CircleServiceClient) CreateMood(
 ) (*cpb.MoodResponse, error) {
 	return client.service.CreateMood(ctx, req)
 }
+
+func (client *CircleServiceClient) ExploreCircles(
+	ctx context.Context,
+	req *cpb.ExploreCirclesRequest,
+) (*cpb.ExploreCirclesResponse, error) {
+	return client.service.ExploreCircles(ctx, req)
+}
