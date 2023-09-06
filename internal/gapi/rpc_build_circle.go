@@ -10,7 +10,7 @@ import (
 )
 
 func (server *Server) BuildCircle(stream pb.App_BuildCircleServer) error {
-	var buildCircleResponse *pb.BuildCircleResponse
+	var buildCircleResponse = &pb.BuildCircleResponse{}
 	defer func() {
 		err := stream.SendAndClose(buildCircleResponse)
 		if err != nil {
@@ -37,13 +37,14 @@ func (server *Server) BuildCircle(stream pb.App_BuildCircleServer) error {
 	if oErr != nil {
 		return logError(oErr)
 	}
+
 	if uploadResponse != nil {
 		cpbCreateCircleRequest.Avatar = uploadResponse.Path
 		circleServiceResp, err := server.CircleServiceClient.CreateCircle(requestContext, cpbCreateCircleRequest)
 		if err != nil {
 			return logError(err)
 		}
-		var circle *pb.Circle
+		var circle = &pb.Circle{}
 		circle, err = util.ConvertTypes(circleServiceResp.Circle, circle)
 		if err != nil {
 			return logError(fmt.Errorf("could not convert circle-service circle to gateway circle: %w", err))

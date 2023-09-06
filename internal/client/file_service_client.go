@@ -70,15 +70,9 @@ func (client *FileServiceClient) UploadCircleAvatar(
 		}
 	}
 	uploadResponse, oErr := (*outputStream).CloseAndRecv()
-	//err = iStream.SendAndClose(&pb.BuildCircleResponse{
-	//	Message: fmt.Sprintf("user was updated"),
-	//})
 	if oErr != nil {
 		return inputStream, nil, logError(status.Errorf(codes.Unknown, "couldn't get the response from file server: %v", oErr))
 	}
-	//if err != nil {
-	//	return uploadResponse, logError(status.Errorf(codes.Unknown, "couldn't close the input stream: %v", oErr))
-	//}
 	return inputStream, uploadResponse, nil
 }
 
