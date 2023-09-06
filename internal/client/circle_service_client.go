@@ -21,5 +21,5 @@ func (client *CircleServiceClient) CreateCircle(
 	ctx context.Context,
 	req *cpb.CreateCircleRequest,
 ) (*cpb.CreateCircleResponse, error) {
-	return client.CreateCircle(ctx, req)
+	return client.service.CreateCircle(ctx, req)
 }
