@@ -41,3 +41,39 @@ func (client *AuthServiceClient) Authenticate(ctx context.Context, req *authpb.A
 func (client *AuthServiceClient) GetUsersInfo(ctx context.Context, req *authpb.GetUsersInfoRequest) (*authpb.GetUsersInfoResponse, error) {
 	return client.service.GetUsersInfo(ctx, req)
 }
+
+func (client *AuthServiceClient) RefreshToken(ctx context.Context, req *authpb.RefreshTokenRequest) (*authpb.RefreshTokenResponse, error) {
+	return client.service.RefreshToken(ctx, req)
+}
+
+func (client *AuthServiceClient) TerminateSingleSession(ctx context.Context, req *authpb.TerminateSingleSessionRequest) (*authpb.TerminateSingleSessionResponse, error) {
+	return client.service.TerminateSingleSession(ctx, req)
+}
+
+func (client *AuthServiceClient) TerminateOtherSessions(ctx context.Context, req *authpb.TerminateOtherSessionsRequest) (*authpb.TerminateOtherSessionsResponse, error) {
+	return client.service.TerminateOtherSessions(ctx, req)
+}
+
+func (client *AuthServiceClient) Logout(ctx context.Context, req *authpb.LogoutRequest) (*authpb.LogoutResponse, error) {
+	return client.service.Logout(ctx, req)
+}
+
+func (client *AuthServiceClient) ChangePassword(ctx context.Context, req *authpb.ChangePasswordRequest) (*authpb.ChangePasswordResponse, error) {
+	return client.service.ChangePassword(ctx, req)
+}
+
+func (client *AuthServiceClient) ResetPassword(ctx context.Context, req *authpb.ResetPasswordRequest) (*authpb.ResetPasswordResponse, error) {
+	return client.service.ResetPassword(ctx, req)
+}
+
+func (client *AuthServiceClient) RequestPasswordReset(ctx context.Context, req *authpb.RequestPasswordResetRequest) (*authpb.RequestPasswordResetResponse, error) {
+	return client.service.RequestPasswordReset(ctx, req)
+}
+
+func (client *AuthServiceClient) VerifyEmail(ctx context.Context, req *authpb.VerifyEmailRequest) (*authpb.VerifyEmailResponse, error) {
+	return client.service.VerifyEmail(ctx, req)
+}
+
+func (client *AuthServiceClient) ResendVerificationEmail(ctx context.Context, req *authpb.ResendVerificationEmailRequest) (*authpb.ResendVerificationEmailResponse, error) {
+	return client.service.ResendVerificationEmail(ctx, req)
+}
