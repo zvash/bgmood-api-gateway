@@ -117,3 +117,7 @@ func (client *CircleServiceClient) RemoveReaction(ctx context.Context, req *cpb.
 func (client *CircleServiceClient) GetAvailableReactions(ctx context.Context, req *cpb.GetAvailableReactionsRequest) (*cpb.GetAvailableReactionsResponse, error) {
 	return client.service.GetAvailableReactions(ctx, req)
 }
+
+func (client *CircleServiceClient) GetCircleJoinRequests(ctx context.Context, req *cpb.GetCircleJoinRequestsRequest) (*cpb.GetCircleJoinRequestsResponse, error) {
+	return client.service.GetCircleJoinRequests(ctx, req)
+}
