@@ -3,6 +3,8 @@ package gapi
 import (
 	"fmt"
 	"github.com/zvash/bgmood-api-gateway/internal/authpb"
+	"github.com/zvash/bgmood-api-gateway/internal/client"
+	"github.com/zvash/bgmood-api-gateway/internal/filepb"
 	"github.com/zvash/bgmood-api-gateway/internal/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,7 +36,17 @@ func (server *Server) UpdateProfile(stream pb.App_UpdateProfileServer) error {
 	}
 	extension := req.GetInfo().GetImageExt()
 
-	uploadResponse, err := server.FileServiceClient.UploadAvatar(&stream, extension)
+	updateProfileRequest := new(pb.UpdateProfileRequest)
+	_, uploadResponse, oErr := client.UploadFileWithStream(server.FileServiceClient, filepb.FileInfo_AVATAR_IMAGE, extension, updateProfileRequest, stream)
+	err = stream.SendAndClose(&pb.UpdateProfileResponse{
+		Message: fmt.Sprintf("user was updated"),
+	})
+	if oErr != nil {
+		return logError(oErr)
+	}
+	if err != nil {
+		return logError(status.Errorf(codes.Unknown, "couldn't close the input stream: %v", err))
+	}
 	if uploadResponse != nil {
 		requestContext = server.buildClientContext(stream.Context())
 		authUpdateRequest = &authpb.UpdateUserRequest{

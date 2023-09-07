@@ -1,7 +1,9 @@
 package gapi
 
 import (
+	"github.com/zvash/bgmood-api-gateway/internal/client"
 	"github.com/zvash/bgmood-api-gateway/internal/cpb"
+	"github.com/zvash/bgmood-api-gateway/internal/filepb"
 	"github.com/zvash/bgmood-api-gateway/internal/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -30,7 +32,8 @@ func (server *Server) ShareMood(stream pb.App_ShareMoodServer) error {
 	}
 
 	extension := req.GetInfo().GetImageExt()
-	_, uploadResponse, oErr := server.FileServiceClient.UploadMoodBackground(&stream, extension)
+	shareMoodReq := new(pb.ShareMoodRequest)
+	_, uploadResponse, oErr := client.UploadFileWithStream(server.FileServiceClient, filepb.FileInfo_BACKGROUND_IMAGE, extension, shareMoodReq, stream)
 	if oErr != nil {
 		return logError(oErr)
 	}

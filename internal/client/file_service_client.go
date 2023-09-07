@@ -2,9 +2,7 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"github.com/zvash/bgmood-api-gateway/internal/filepb"
-	"github.com/zvash/bgmood-api-gateway/internal/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -23,169 +21,58 @@ func NewFileServiceClient(cc *grpc.ClientConn) *FileServiceClient {
 	}
 }
 
-func (client *FileServiceClient) UploadMoodBackground(
-	inputStream *pb.App_ShareMoodServer,
+type ChunkDataAware interface {
+	GetChunkData() []byte
+}
+
+func UploadFileWithStream(
+	client *FileServiceClient,
+	fileType filepb.FileInfo_FileType,
 	ext string,
-) (*pb.App_ShareMoodServer, *filepb.UploadFileResponse, error) {
-	iStream := *inputStream
-	ctx := iStream.Context()
-	outputStream, err := client.uploadFile(ctx, filepb.FileInfo_BACKGROUND_IMAGE, ext, nil)
+	req ChunkDataAware,
+	inputStream grpc.ServerStream,
+) (grpc.ServerStream, *filepb.UploadFileResponse, error) {
+	ctx := inputStream.Context()
+	outputStream, err := client.uploadFile(ctx, fileType, ext, nil)
 	if err != nil {
 		return inputStream, nil, logError(status.Errorf(codes.Unknown, "couldn't initiate a stream to file service: %v", err))
 	}
-
 	imageSize := 0
 	for {
-		err := contextError(iStream.Context())
+		err := contextError(inputStream.Context())
 		if err != nil {
 			return inputStream, nil, logError(err)
 		}
-		req, err := iStream.Recv()
-
-		var finished bool
-		var chunk []byte
-		if err == io.EOF {
-			log.Print("upload is finished")
-			finished = true
-		}
-		if err != nil && !finished {
-			return inputStream, nil, logError(status.Errorf(codes.Unknown, "cannot receive data from request stream: %v", err))
-		}
-		if !finished {
-			chunk = req.GetChunkData()
-			size := len(chunk)
-			log.Printf("received a chunk with size: %d", size)
-			imageSize += size
-			log.Printf("total recieved: %d", imageSize)
-			outputStream, err = client.uploadFile(ctx, filepb.FileInfo_BACKGROUND_IMAGE, ext, chunk, outputStream)
+		if err := inputStream.RecvMsg(req); err != nil {
 			if err == io.EOF {
-				log.Print("upload to file service is finished")
-				break
+				log.Print("upload is finished")
+			} else {
+				return nil, nil, logError(status.Errorf(codes.Unknown, "cannot receive data from request stream: %v", err))
 			}
-			if err != nil {
-				return inputStream, nil, logError(status.Errorf(codes.Unknown, "failed to send data to file service: %v", err))
-			}
-		} else {
 			break
 		}
+		chunk := req.GetChunkData()
+		size := len(chunk)
+		log.Printf("received a chunk with size: %d", size)
+		imageSize += size
+		log.Printf("total received: %d", imageSize)
+
+		outputStream, err = client.uploadFile(ctx, fileType, ext, chunk, outputStream)
+		if err == io.EOF {
+			log.Print("upload to file service is finished")
+			break
+		}
+		if err != nil {
+			return nil, nil, logError(status.Errorf(codes.Unknown, "failed to send data to file service: %v", err))
+		}
+
 	}
+
 	uploadResponse, oErr := (*outputStream).CloseAndRecv()
 	if oErr != nil {
-		return inputStream, nil, logError(status.Errorf(codes.Unknown, "couldn't get the response from file server: %v", oErr))
+		return nil, nil, logError(status.Errorf(codes.Unknown, "couldn't get the response from file server: %v", oErr))
 	}
 	return inputStream, uploadResponse, nil
-}
-
-func (client *FileServiceClient) UploadCircleAvatar(
-	inputStream *pb.App_BuildCircleServer,
-	ext string,
-) (*pb.App_BuildCircleServer, *filepb.UploadFileResponse, error) {
-	iStream := *inputStream
-	ctx := iStream.Context()
-	outputStream, err := client.uploadFile(ctx, filepb.FileInfo_AVATAR_IMAGE, ext, nil)
-	if err != nil {
-		return inputStream, nil, logError(status.Errorf(codes.Unknown, "couldn't initiate a stream to file service: %v", err))
-	}
-
-	imageSize := 0
-	for {
-		err := contextError(iStream.Context())
-		if err != nil {
-			return inputStream, nil, logError(err)
-		}
-		req, err := iStream.Recv()
-
-		var finished bool
-		var chunk []byte
-		if err == io.EOF {
-			log.Print("upload is finished")
-			finished = true
-		}
-		if err != nil && !finished {
-			return inputStream, nil, logError(status.Errorf(codes.Unknown, "cannot receive data from request stream: %v", err))
-		}
-		if !finished {
-			chunk = req.GetChunkData()
-			size := len(chunk)
-			log.Printf("received a chunk with size: %d", size)
-			imageSize += size
-			log.Printf("total recieved: %d", imageSize)
-			outputStream, err = client.uploadFile(ctx, filepb.FileInfo_AVATAR_IMAGE, ext, chunk, outputStream)
-			if err == io.EOF {
-				log.Print("upload to file service is finished")
-				break
-			}
-			if err != nil {
-				return inputStream, nil, logError(status.Errorf(codes.Unknown, "failed to send data to file service: %v", err))
-			}
-		} else {
-			break
-		}
-	}
-	uploadResponse, oErr := (*outputStream).CloseAndRecv()
-	if oErr != nil {
-		return inputStream, nil, logError(status.Errorf(codes.Unknown, "couldn't get the response from file server: %v", oErr))
-	}
-	return inputStream, uploadResponse, nil
-}
-
-func (client *FileServiceClient) UploadAvatar(
-	inputStream *pb.App_UpdateProfileServer,
-	ext string,
-) (*filepb.UploadFileResponse, error) {
-	iStream := *inputStream
-	ctx := iStream.Context()
-	outputStream, err := client.uploadFile(ctx, filepb.FileInfo_AVATAR_IMAGE, ext, nil)
-	if err != nil {
-		return nil, logError(status.Errorf(codes.Unknown, "couldn't initiate a stream to file service: %v", err))
-	}
-
-	imageSize := 0
-	for {
-		err := contextError(iStream.Context())
-		if err != nil {
-			return nil, logError(err)
-		}
-		req, err := iStream.Recv()
-
-		var finished bool
-		var chunk []byte
-		if err == io.EOF {
-			log.Print("upload is finished")
-			finished = true
-		}
-		if err != nil && !finished {
-			return nil, logError(status.Errorf(codes.Unknown, "cannot receive data from request stream: %v", err))
-		}
-		if !finished {
-			chunk = req.GetChunkData()
-			size := len(chunk)
-			log.Printf("received a chunk with size: %d", size)
-			imageSize += size
-			log.Printf("total recieved: %d", imageSize)
-			outputStream, err = client.uploadFile(ctx, filepb.FileInfo_AVATAR_IMAGE, ext, chunk, outputStream)
-			if err == io.EOF {
-				log.Print("upload to file service is finished")
-				break
-			}
-			if err != nil {
-				return nil, logError(status.Errorf(codes.Unknown, "failed to send data to file service: %v", err))
-			}
-		} else {
-			break
-		}
-	}
-	uploadResponse, oErr := (*outputStream).CloseAndRecv()
-	err = iStream.SendAndClose(&pb.UpdateProfileResponse{
-		Message: fmt.Sprintf("user was updated"),
-	})
-	if oErr != nil {
-		return nil, logError(status.Errorf(codes.Unknown, "couldn't get the response from file server: %v", oErr))
-	}
-	if err != nil {
-		return uploadResponse, logError(status.Errorf(codes.Unknown, "couldn't close the input stream: %v", oErr))
-	}
-	return uploadResponse, nil
 }
 
 func (client *FileServiceClient) uploadFile(
