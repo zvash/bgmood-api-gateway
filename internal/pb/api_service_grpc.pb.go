@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	App_UpdateProfile_FullMethodName         = "/pb.App/UpdateProfile"
-	App_BuildCircle_FullMethodName           = "/pb.App/BuildCircle"
-	App_ShareMood_FullMethodName             = "/pb.App/ShareMood"
-	App_GetCircleJoinRequests_FullMethodName = "/pb.App/GetCircleJoinRequests"
+	App_UpdateProfile_FullMethodName                 = "/pb.App/UpdateProfile"
+	App_BuildCircle_FullMethodName                   = "/pb.App/BuildCircle"
+	App_ShareMood_FullMethodName                     = "/pb.App/ShareMood"
+	App_GetCircleJoinRequestsWithUser_FullMethodName = "/pb.App/GetCircleJoinRequestsWithUser"
 )
 
 // AppClient is the client API for App service.
@@ -32,7 +32,7 @@ type AppClient interface {
 	UpdateProfile(ctx context.Context, opts ...grpc.CallOption) (App_UpdateProfileClient, error)
 	BuildCircle(ctx context.Context, opts ...grpc.CallOption) (App_BuildCircleClient, error)
 	ShareMood(ctx context.Context, opts ...grpc.CallOption) (App_ShareMoodClient, error)
-	GetCircleJoinRequests(ctx context.Context, in *GetCircleJoinRequestsRequest, opts ...grpc.CallOption) (*CircleJoinRequestsWithUserResponse, error)
+	GetCircleJoinRequestsWithUser(ctx context.Context, in *GetCircleJoinRequestsWithUserRequest, opts ...grpc.CallOption) (*CircleJoinRequestsWithUserResponse, error)
 }
 
 type appClient struct {
@@ -145,9 +145,9 @@ func (x *appShareMoodClient) CloseAndRecv() (*ShareMoodResponse, error) {
 	return m, nil
 }
 
-func (c *appClient) GetCircleJoinRequests(ctx context.Context, in *GetCircleJoinRequestsRequest, opts ...grpc.CallOption) (*CircleJoinRequestsWithUserResponse, error) {
+func (c *appClient) GetCircleJoinRequestsWithUser(ctx context.Context, in *GetCircleJoinRequestsWithUserRequest, opts ...grpc.CallOption) (*CircleJoinRequestsWithUserResponse, error) {
 	out := new(CircleJoinRequestsWithUserResponse)
-	err := c.cc.Invoke(ctx, App_GetCircleJoinRequests_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, App_GetCircleJoinRequestsWithUser_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ type AppServer interface {
 	UpdateProfile(App_UpdateProfileServer) error
 	BuildCircle(App_BuildCircleServer) error
 	ShareMood(App_ShareMoodServer) error
-	GetCircleJoinRequests(context.Context, *GetCircleJoinRequestsRequest) (*CircleJoinRequestsWithUserResponse, error)
+	GetCircleJoinRequestsWithUser(context.Context, *GetCircleJoinRequestsWithUserRequest) (*CircleJoinRequestsWithUserResponse, error)
 	mustEmbedUnimplementedAppServer()
 }
 
@@ -178,8 +178,8 @@ func (UnimplementedAppServer) BuildCircle(App_BuildCircleServer) error {
 func (UnimplementedAppServer) ShareMood(App_ShareMoodServer) error {
 	return status.Errorf(codes.Unimplemented, "method ShareMood not implemented")
 }
-func (UnimplementedAppServer) GetCircleJoinRequests(context.Context, *GetCircleJoinRequestsRequest) (*CircleJoinRequestsWithUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCircleJoinRequests not implemented")
+func (UnimplementedAppServer) GetCircleJoinRequestsWithUser(context.Context, *GetCircleJoinRequestsWithUserRequest) (*CircleJoinRequestsWithUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCircleJoinRequestsWithUser not implemented")
 }
 func (UnimplementedAppServer) mustEmbedUnimplementedAppServer() {}
 
@@ -272,20 +272,20 @@ func (x *appShareMoodServer) Recv() (*ShareMoodRequest, error) {
 	return m, nil
 }
 
-func _App_GetCircleJoinRequests_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCircleJoinRequestsRequest)
+func _App_GetCircleJoinRequestsWithUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCircleJoinRequestsWithUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AppServer).GetCircleJoinRequests(ctx, in)
+		return srv.(AppServer).GetCircleJoinRequestsWithUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: App_GetCircleJoinRequests_FullMethodName,
+		FullMethod: App_GetCircleJoinRequestsWithUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).GetCircleJoinRequests(ctx, req.(*GetCircleJoinRequestsRequest))
+		return srv.(AppServer).GetCircleJoinRequestsWithUser(ctx, req.(*GetCircleJoinRequestsWithUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -298,8 +298,8 @@ var App_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AppServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetCircleJoinRequests",
-			Handler:    _App_GetCircleJoinRequests_Handler,
+			MethodName: "GetCircleJoinRequestsWithUser",
+			Handler:    _App_GetCircleJoinRequestsWithUser_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

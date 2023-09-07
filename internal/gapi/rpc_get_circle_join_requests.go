@@ -7,9 +7,9 @@ import (
 	"github.com/zvash/bgmood-api-gateway/internal/pb"
 )
 
-func (server *Server) GetCircleJoinRequests(
+func (server *Server) GetCircleJoinRequestsWithUser(
 	ctx context.Context,
-	req *pb.GetCircleJoinRequestsRequest,
+	req *pb.GetCircleJoinRequestsWithUserRequest,
 ) (*pb.CircleJoinRequestsWithUserResponse, error) {
 	outgoingContext, err := server.buildClientContextWithUser(ctx)
 	if err != nil {
