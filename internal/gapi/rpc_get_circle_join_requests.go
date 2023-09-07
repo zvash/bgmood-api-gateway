@@ -34,6 +34,10 @@ func (server *Server) GetCircleJoinRequestsWithUser(
 		userIdToJoinRequestMap[joinRequest.GetUserId()] = joinRequest
 	}
 
+	if len(userIds) == 0 {
+		return &pb.CircleJoinRequestsWithUserResponse{}, nil
+	}
+
 	authReq := &authpb.GetUsersInfoRequest{
 		UserIds: userIds,
 	}
