@@ -2,7 +2,6 @@ package gapi
 
 import (
 	"fmt"
-	"github.com/zvash/bgmood-api-gateway/internal/client"
 	"github.com/zvash/bgmood-api-gateway/internal/cpb"
 	"github.com/zvash/bgmood-api-gateway/internal/filepb"
 	"github.com/zvash/bgmood-api-gateway/internal/pb"
@@ -36,7 +35,7 @@ func (server *Server) BuildCircle(stream pb.App_BuildCircleServer) error {
 
 	extension := req.GetInfo().GetImageExt()
 	buildCircleRequest := new(pb.BuildCircleRequest)
-	_, uploadResponse, oErr := client.UploadFileWithStream(server.FileServiceClient, filepb.FileInfo_AVATAR_IMAGE, extension, buildCircleRequest, stream)
+	_, uploadResponse, oErr := server.FileServiceClient.UploadFileWithStream(filepb.FileInfo_AVATAR_IMAGE, extension, buildCircleRequest, stream)
 	if oErr != nil {
 		return logError(oErr)
 	}

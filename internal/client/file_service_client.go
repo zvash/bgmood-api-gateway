@@ -25,8 +25,7 @@ type ChunkDataAware interface {
 	GetChunkData() []byte
 }
 
-func UploadFileWithStream(
-	client *FileServiceClient,
+func (client *FileServiceClient) UploadFileWithStream(
 	fileType filepb.FileInfo_FileType,
 	ext string,
 	req ChunkDataAware,

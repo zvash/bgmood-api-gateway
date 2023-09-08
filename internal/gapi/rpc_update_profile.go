@@ -3,7 +3,6 @@ package gapi
 import (
 	"fmt"
 	"github.com/zvash/bgmood-api-gateway/internal/authpb"
-	"github.com/zvash/bgmood-api-gateway/internal/client"
 	"github.com/zvash/bgmood-api-gateway/internal/filepb"
 	"github.com/zvash/bgmood-api-gateway/internal/pb"
 	"google.golang.org/grpc/codes"
@@ -37,7 +36,7 @@ func (server *Server) UpdateProfile(stream pb.App_UpdateProfileServer) error {
 	extension := req.GetInfo().GetImageExt()
 
 	updateProfileRequest := new(pb.UpdateProfileRequest)
-	_, uploadResponse, oErr := client.UploadFileWithStream(server.FileServiceClient, filepb.FileInfo_AVATAR_IMAGE, extension, updateProfileRequest, stream)
+	_, uploadResponse, oErr := server.FileServiceClient.UploadFileWithStream(filepb.FileInfo_AVATAR_IMAGE, extension, updateProfileRequest, stream)
 	err = stream.SendAndClose(&pb.UpdateProfileResponse{
 		Message: fmt.Sprintf("user was updated"),
 	})
