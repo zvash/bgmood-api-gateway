@@ -10,7 +10,7 @@ type Config struct {
 	AppName                        string `mapstructure:"APP_NAME"`
 	Environment                    string `mapstructure:"ENVIRONMENT"`
 	GRPCServerAddress              string `mapstructure:"GRPC_SERVER_ADDRESS"`
-	HTTPServerAddress              string `mapstructure:"HTTP_SERVER_ADDRESS"`
+	PrometheusHTTPServerAddress    string `mapstructure:"PROMETHEUS_HTTP_SERVER_ADDRESS"`
 	AuthServiceGRPCServerAddress   string `mapstructure:"AUTH_SERVICE_GRPC_SERVER_ADDRESS"`
 	FileServiceGRPCServerAddress   string `mapstructure:"FILE_SERVICE_GRPC_SERVER_ADDRESS"`
 	CircleServiceGRPCServerAddress string `mapstructure:"CIRCLE_SERVICE_GRPC_SERVER_ADDRESS"`
