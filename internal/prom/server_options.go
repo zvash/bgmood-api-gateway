@@ -13,6 +13,7 @@ type exemplarFromCtxFn func(ctx context.Context) prometheus.Labels
 
 type serverMetricsConfig struct {
 	counterOpts counterOptions
+	gaugeOpts   gaugeOptions
 	// serverHandledHistogram can be nil.
 	serverHandledHistogram *prometheus.HistogramVec
 }

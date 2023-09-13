@@ -7,6 +7,8 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors"
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
+	"runtime"
+	"time"
 )
 
 // ServerMetrics represents a collection of metrics to be registered on a
@@ -18,6 +20,7 @@ type ServerMetrics struct {
 	serverStreamMsgSent     *prometheus.CounterVec
 	// serverHandledHistogram can be nil.
 	serverHandledHistogram *prometheus.HistogramVec
+	memoryStatsAllocated   prometheus.Gauge
 }
 
 // NewServerMetrics returns a new ServerMetrics object that has server interceptor methods.
@@ -48,6 +51,12 @@ func NewServerMetrics(opts ...ServerMetricsOption) *ServerMetrics {
 				Help: "Total number of gRPC stream messages sent by the server.",
 			}), []string{"grpc_type", "grpc_service", "grpc_method"}),
 		serverHandledHistogram: config.serverHandledHistogram,
+		memoryStatsAllocated: prometheus.NewGauge(
+			config.gaugeOpts.apply(prometheus.GaugeOpts{
+				Name: "go_memstats_alloc_bytes",
+				Help: "Number of bytes allocated and not yet freed.",
+			},
+			)),
 	}
 }
 
@@ -62,6 +71,7 @@ func (m *ServerMetrics) Describe(ch chan<- *prometheus.Desc) {
 	if m.serverHandledHistogram != nil {
 		m.serverHandledHistogram.Describe(ch)
 	}
+	m.memoryStatsAllocated.Describe(ch)
 }
 
 // Collect is called by the Prometheus registry when collecting
@@ -75,6 +85,7 @@ func (m *ServerMetrics) Collect(ch chan<- prometheus.Metric) {
 	if m.serverHandledHistogram != nil {
 		m.serverHandledHistogram.Collect(ch)
 	}
+	m.memoryStatsAllocated.Collect(ch)
 }
 
 // InitializeMetrics initializes all metrics, with their appropriate null
@@ -88,6 +99,7 @@ func (m *ServerMetrics) InitializeMetrics(server *grpc.Server) {
 			m.preRegisterMethod(serviceName, &mInfo)
 		}
 	}
+	go m.initializePeriodicalDataCollection()
 }
 
 // preRegisterMethod is invoked on Register of a Server, allowing all gRPC services labels to be pre-populated.
@@ -120,4 +132,18 @@ func (m *ServerMetrics) StreamServerInterceptor(opts ...Option) grpc.StreamServe
 		opts:          opts,
 		serverMetrics: m,
 	})
+}
+
+func (m *ServerMetrics) initializePeriodicalDataCollection() {
+	for {
+		m.collectAllocatedMemory()
+
+		time.Sleep(2 * time.Second)
+	}
+}
+
+func (m *ServerMetrics) collectAllocatedMemory() {
+	var memStat runtime.MemStats
+	runtime.ReadMemStats(&memStat)
+	m.memoryStatsAllocated.Set(float64(memStat.Alloc))
 }

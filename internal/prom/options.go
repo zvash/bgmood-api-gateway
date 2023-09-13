@@ -23,10 +23,22 @@ func FromError(err error) *status.Status {
 // A CounterOption lets you add options to Counter metrics using With* funcs.
 type CounterOption func(*prometheus.CounterOpts)
 
+// A GaugeOption lets you add options to Gauge metrics using With* funcs.
+type GaugeOption func(*prometheus.GaugeOpts)
+
 type counterOptions []CounterOption
 
 func (co counterOptions) apply(o prometheus.CounterOpts) prometheus.CounterOpts {
 	for _, f := range co {
+		f(&o)
+	}
+	return o
+}
+
+type gaugeOptions []GaugeOption
+
+func (gao gaugeOptions) apply(o prometheus.GaugeOpts) prometheus.GaugeOpts {
+	for _, f := range gao {
 		f(&o)
 	}
 	return o
